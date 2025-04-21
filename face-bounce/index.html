@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Bounce - WebOccult Technologies</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/blazeface"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <style>
+        :root {
+            --primary-color: #e63946;
+            --primary-glow: rgba(230, 57, 70, 0.6);
+            --dark-bg: #0f1c2e;
+            --light-text: #f1faee;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--dark-bg);
+            color: var(--light-text);
+            overflow: hidden;
+        }
+
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .particles-container {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+        }
+
+        .screen.active {
+            display: flex;
+        }
+
+        .game-panel {
+            background-color: rgba(15, 28, 46, 0.85);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--primary-color);
+            text-align: center;
+        }
+
+        .game-title {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3rem;
+            margin: 10px 0;
+            color: var(--primary-color);
+        }
+
+        .text-glow {
+            text-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .game-subtitle {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            opacity: 0.8;
+        }
+
+        .button-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .primary-button, .secondary-button {
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            min-width: 150px;
+        }
+
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+
+        .secondary-button {
+            background-color: transparent;
+            color: var(--light-text);
+            border: 2px solid var(--light-text);
+        }
+
+        .primary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(230, 57, 70, 0.4);
+        }
+
+        .secondary-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(241, 250, 238, 0.2);
+        }
+
+        .btn-glow {
+            animation: button-glow 2s infinite;
+        }
+
+        @keyframes button-glow {
+            0% { box-shadow: 0 0 5px var(--primary-glow); }
+            50% { box-shadow: 0 0 20px var(--primary-glow), 0 0 30px var(--primary-glow); }
+            100% { box-shadow: 0 0 5px var(--primary-glow); }
+        }
+
+        .game-area {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .game-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: rgba(15, 28, 46, 0.8);
+            z-index: 5;
+            box-sizing: border-box;
+        }
+
+        .player-info, .game-stats {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin-right: 15px;
+        }
+
+        .game-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 5;
+            background-color: rgba(15, 28, 46, 0.8);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid var(--primary-color);
+        }
+
+        .sensitivity-control {
+            display: flex;
+            flex-direction: column;
+            width: 250px;
+        }
+
+        .sensitivity-control label {
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        #camera-display {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 180px;
+            height: 135px;
+            border-radius: 10px;
+            border: 3px solid var(--primary-color);
+            z-index: 2;
+            transform: scaleX(-1);
+            background-color: #000;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .game-paddle {
+            position: absolute;
+            height: 15px;
+            background-color: var(--primary-color);
+            border-radius: 5px;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            box-shadow: 0 0 10px var(--primary-glow);
+        }
+
+        .countdown-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 0.8; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Game Over Screen Styles */
+        .game-over-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(15, 28, 46, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            width: 80%;
+            max-width: 500px;
+            border: 2px solid var(--primary-color);
+        }
+
+        .game-over-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .score-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: var(--light-text);
+            margin-top: 15px;
+        }
+
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .leaderboard-table th {
+            background-color: rgba(230, 57, 70, 0.2);
+            font-weight: 600;
+        }
+
+        .leaderboard-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 15px 0;
+            width: 100%;
+            border-radius: 8px;
+            background-color: rgba(15, 28, 46, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="particles-container" id="particles-js"></div>
+    
+    <div class="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="screen active">
+            <div class="game-panel" data-aos="zoom-in">
+                <div class="logo-container">
+                    <img src="assets/images/logo.png" alt="WebOccult Technologies" class="logo">
+                </div>
+                <h1 class="game-title text-glow">Face Bounce</h1>
+                <p class="game-subtitle">A WebOccult Technologies Creation</p>
+                
+                <div class="how-to-play">
+                    <h2><i class="fas fa-gamepad"></i> How to Play</h2>
+                    <ul class="feature-list">
+                        <li><span class="icon-circle"><i class="fas fa-user"></i></span> Control paddle with face movements</li>
+                        <li><span class="icon-circle"><i class="fas fa-eye"></i></span> Look left/right to move paddle</li>
+                        <li><span class="icon-circle"><i class="fas fa-bolt"></i></span> Collect power-ups for bonuses</li>
+                        <li><span class="icon-circle"><i class="fas fa-clock"></i></span> Survive as long as possible</li>
+                        <li><span class="icon-circle"><i class="fas fa-trophy"></i></span> Make it to the leaderboard!</li>
+                    </ul>
+                    <p class="note"><i class="fas fa-lightbulb"></i> Ensure good lighting and clear face visibility</p>
+                </div>
+                
+                <div class="button-container">
+                    <button id="start-button" class="primary-button btn-glow">
+                        <i class="fas fa-play"></i> Start Game
+                    </button>
+                    <button id="instructions-btn" class="secondary-button">
+                        <i class="fas fa-info-circle"></i> Instructions
+                    </button>
+                    <button id="leaderboard-btn" class="secondary-button">
+                        <i class="fas fa-trophy"></i> View Leaderboard
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Player Info Screen -->
+        <div id="player-info-screen" class="screen">
+            <div class="game-panel" data-aos="fade-up">
+                <h2><i class="fas fa-user-edit"></i> Player Information</h2>
+                <form id="player-form">
+                    <div class="input-container">
+                        <label for="player-name-input"><i class="fas fa-user"></i> Your Name</label>
+                        <input type="text" id="player-name-input" name="player-name" placeholder="Enter your name" required>
+                    </div>
+                    <div class="input-container">
+                        <label for="player-email"><i class="fas fa-envelope"></i> Email (optional)</label>
+                        <input type="email" id="player-email" name="player-email" placeholder="example@email.com">
+                    </div>
+                    <div class="button-container">
+                        <button type="submit" class="primary-button">
+                            <i class="fas fa-check-circle"></i> Continue
+                        </button>
+                        <button type="button" id="back-to-welcome" class="secondary-button">
+                            <i class="fas fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Instructions Screen -->
+        <div id="instructions-screen" class="screen">
+            <div class="game-panel" data-aos="fade-up">
+                <h2><i class="fas fa-book"></i> How to Play</h2>
+                <div class="instructions-content">
+                    <p><i class="fas fa-info-circle"></i> Face Bounce is a modern take on the classic paddle game, controlled with your face!</p>
+                    <ul class="feature-list">
+                        <li><i class="fas fa-arrows-alt-h"></i> Move your face left and right to control the paddle</li>
+                        <li><i class="fas fa-exclamation-triangle"></i> Don't let the ball fall off the bottom of the screen</li>
+                        <li><i class="fas fa-gift"></i> Collect power-ups to gain advantages</li>
+                        <li><i class="fas fa-hourglass-half"></i> Try to survive as long as possible</li>
+                    </ul>
+                    <h3><i class="fas fa-bolt"></i> Power-ups</h3>
+                    <div class="power-ups-container">
+                        <div class="power-up-card">
+                            <span class="power-up shield">S</span>
+                            <span>Shield - Protects the bottom once</span>
+                        </div>
+                        <div class="power-up-card">
+                            <span class="power-up slow">T</span>
+                            <span>Time Slow - Slows the ball</span>
+                        </div>
+                        <div class="power-up-card">
+                            <span class="power-up multi">M</span>
+                            <span>Multi-ball - Adds extra balls</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-container">
+                    <button id="back-from-instructions" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Camera Permission Screen -->
+        <div id="camera-permission-screen" class="screen">
+            <div class="game-panel" data-aos="zoom-in">
+                <h2><i class="fas fa-video"></i> Camera Access</h2>
+                <p>This game requires camera access to track your face movements.</p>
+                <p><i class="fas fa-shield-alt"></i> Your camera feed is processed locally and is never sent to any server.</p>
+                <div class="camera-permission-content">
+                    <div class="camera-icon-container">
+                        <i class="fas fa-camera"></i>
+                    </div>
+                    <p>Click the button below to grant camera access and start the game.</p>
+                </div>
+                <div class="button-container">
+                    <button id="grant-permission-btn" class="primary-button">
+                        <i class="fas fa-check-circle"></i> Grant Camera Access
+                    </button>
+                    <button id="back-to-welcome" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Screen -->
+        <div id="game-screen" class="screen">
+            <div class="game-header">
+                <div class="player-info">
+                    <i class="fas fa-user"></i> <span id="display-name">Player</span>
+                </div>
+                <div class="game-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-stopwatch"></i> <span id="time">0.00</span>s
+                    </div>
+                    <div class="power-ups-active" id="active-power-ups">
+                        <!-- Active power-ups will be displayed here -->
+                    </div>
+                </div>
+                <button id="pause-btn" class="icon-button">
+                    <i class="fas fa-pause"></i>
+                </button>
+            </div>
+            
+            <div class="game-area">
+                <canvas id="game-canvas"></canvas>
+                <div class="game-paddle" id="paddle"></div>
+                <video id="camera-display" autoplay playsinline muted></video>
+                <!-- Removed the countdown overlay with '3' -->
+            </div>
+            
+            <div class="game-controls">
+                <div class="sensitivity-control">
+                    <label for="sensitivity-slider">
+                        <span><i class="fas fa-sliders-h"></i> Sensitivity</span>
+                        <span id="sensitivity-value">0.7</span>
+                    </label>
+                    <input type="range" id="sensitivity-slider" min="0.5" max="5.0" step="0.1" value="0.7">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pause Screen -->
+        <div id="pause-screen" class="screen">
+            <div class="game-panel" data-aos="fade-down">
+                <h2><i class="fas fa-pause"></i> Game Paused</h2>
+                <div class="button-container">
+                    <button id="resume-btn" class="primary-button">
+                        <i class="fas fa-play"></i> Resume Game
+                    </button>
+                    <button id="quit-btn" class="secondary-button">
+                        <i class="fas fa-times"></i> Quit Game
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Game Over Screen - Redesigned and QR section removed -->
+        <div id="game-over-screen" class="screen">
+            <div class="game-over-panel" data-aos="fade-up">
+                <div class="game-over-header">
+                    <h2><i class="fas fa-flag-checkered"></i> Game Over</h2>
+                    <p>Your game has ended!</p>
+                </div>
+                
+                <div class="score-display">
+                    <div class="score-item">
+                        <span><i class="fas fa-stopwatch"></i> Time survived:</span>
+                        <span id="final-score">7</span> seconds
+                    </div>
+                    <div class="score-item">
+                        <span><i class="fas fa-gamepad"></i> Game mode:</span>
+                        <span>Classic</span>
+                    </div>
+                </div>
+                
+                <div class="button-container">
+                    <button id="play-again-btn" class="primary-button">
+                        <i class="fas fa-redo"></i> Retry
+                    </button>
+                    <button id="start-soon-btn" class="primary-button">
+                        <i class="fas fa-play"></i> Start Soon
+                    </button>
+                    <button id="view-leaderboard-btn" class="secondary-button">
+                        <i class="fas fa-trophy"></i> Leaderboard
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Leaderboard Screen with empty table body -->
+        <div id="leaderboard-screen" class="screen">
+            <div class="game-panel" data-aos="fade-up">
+                <h2><i class="fas fa-trophy"></i> Leaderboard</h2>
+                <div class="leaderboard-container">
+                    <table class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th><i class="fas fa-medal"></i> Rank</th>
+                                <th><i class="fas fa-user"></i> Name</th>
+                                <th><i class="fas fa-stopwatch"></i> Time (s)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-body">
+                            <!-- Leaderboard entries will be inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="button-container">
+                    <button id="back-from-leaderboard" class="secondary-button">
+                        <i class="fas fa-home"></i> Back to Menu
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hidden video for face detection -->
+    <video id="camera-feed" autoplay playsinline muted style="display: none;"></video>
+    
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
+    <script>
+        // Initialize AOS
+        document.addEventListener('DOMContentLoaded', function() {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true
+            });
+            
+            // Initialize particles.js
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": {
+                        "value": 60,
+                        "density": {
+                            "enable": true,
+                            "value_area": 800
+                        }
+                    },
+                    "color": {
+                        "value": "#e63946"
+                    },
+                    "shape": {
+                        "type": "circle"
+                    },
+                    "opacity": {
+                        "value": 0.5,
+                        "random": true
+                    },
+                    "size": {
+                        "value": 3,
+                        "random": true
+                    },
+                    "line_linked": {
+                        "enable": true,
+                        "distance": 150,
+                        "color": "#e63946",
+                        "opacity": 0.2,
+                        "width": 1
+                    },
+                    "move": {
+                        "enable": true,
+                        "speed": 2,
+                        "direction": "none",
+                        "random": false,
+                        "straight": false,
+                        "out_mode": "out",
+                        "bounce": false
+                    }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": {
+                        "onhover": {
+                            "enable": true,
+                            "mode": "grab"
+                        },
+                        "onclick": {
+                            "enable": true,
+                            "mode": "push"
+                        }
+                    }
+                },
+                "retina_detect": true
+            });
+        });
+    </script>
+    
+    <!-- Load game scripts -->
+    <script src="js/leaderboard.js"></script>
+    <script src="js/faceDetection.js"></script>
+    <script src="js/game.js"></script>
+</body>
+</html>

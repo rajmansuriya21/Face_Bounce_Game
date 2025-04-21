@@ -1,0 +1,515 @@
+/* Face Bounce - WebOccult Technologies */
+/* Enhanced Main Styles */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800&display=swap');
+
+:root {
+    --primary-color: #e63946;
+    --primary-glow: rgba(230, 57, 70, 0.7);
+    --secondary-color: #457b9d;
+    --tertiary-color: #ff9500;
+    --dark-bg: #1d3557;
+    --darker-bg: #0f1c2e;
+    --light-text: #f1faee;
+    --panel-bg: rgba(15, 28, 46, 0.95);
+    --panel-border: #e63946;
+    --button-hover: #ff5a67;
+    --button-secondary: #457b9d;
+    --button-secondary-hover: #5a8db0;
+    --success-color: #4caf50;
+    --info-color: #2196f3;
+    --warning-color: #ff9800;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--darker-bg);
+    color: var(--light-text);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    background-image: linear-gradient(135deg, var(--darker-bg), var(--dark-bg));
+}
+
+/* Particles Background */
+.particles-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.5;
+}
+
+/* Game Container */
+.game-container {
+    width: 100%;
+    max-width: 1200px;
+    height: 100vh;
+    max-height: 800px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Screens */
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    perspective: 1000px;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* Game Panel */
+.game-panel {
+    background-color: var(--panel-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 35px;
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    transform-style: preserve-3d;
+    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.game-panel:hover {
+    box-shadow: 0 20px 40px rgba(230, 57, 70, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Logo and Title */
+.logo-container {
+    margin-bottom: 25px;
+    display: flex;
+    justify-content: center;
+}
+
+.logo {
+    width: 120px;
+    height: auto;
+    filter: drop-shadow(0 5px 15px rgba(230, 57, 70, 0.5));
+    transition: all 0.3s ease;
+}
+
+.game-title {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    margin-bottom: 5px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.game-subtitle {
+    font-size: 1.1rem;
+    font-weight: 300;
+    margin-bottom: 35px;
+    opacity: 0.9;
+    letter-spacing: 0.5px;
+}
+
+/* Text Glow Effect */
+.text-glow {
+    text-shadow: 0 0 10px var(--primary-glow),
+                 0 0 20px var(--primary-glow),
+                 0 0 30px var(--primary-glow);
+}
+
+/* How to Play */
+.how-to-play {
+    margin-bottom: 35px;
+    padding: 20px;
+    border-radius: 10px;
+    background: rgba(15, 28, 46, 0.5);
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.2);
+}
+
+.how-to-play h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 1.6rem;
+    color: var(--light-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.how-to-play h2 i {
+    color: var(--primary-color);
+}
+
+.feature-list {
+    list-style: none;
+}
+
+.feature-list li {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.feature-list li:hover {
+    background: rgba(230, 57, 70, 0.1);
+    transform: translateX(5px);
+}
+
+.icon-circle {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: 50%;
+    margin-right: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.note {
+    font-size: 0.95rem;
+    margin-top: 20px;
+    opacity: 0.9;
+    text-align: center;
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.note i {
+    color: #ffcc00;
+}
+
+/* Input Container */
+.input-container {
+    margin-bottom: 20px;
+}
+
+input[type="text"],
+input[type="email"] {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--light-text);
+    font-family: 'Poppins', sans-serif;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    background-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 0 10px rgba(230, 57, 70, 0.3);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+label {
+    display: block;
+    text-align: left;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+label i {
+    color: var(--primary-color);
+}
+
+/* Buttons */
+.button-container {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 25px;
+}
+
+button {
+    font-family: 'Poppins', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.primary-button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 6px 15px rgba(230, 57, 70, 0.3);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.primary-button:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--button-hover);
+    z-index: -2;
+}
+
+.primary-button:before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background-color: var(--button-hover);
+    transition: all 0.3s;
+    z-index: -1;
+}
+
+.primary-button:hover {
+    color: #fff;
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(230, 57, 70, 0.4);
+}
+
+.primary-button:hover:before {
+    width: 100%;
+}
+
+.primary-button:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 8px rgba(230, 57, 70, 0.3);
+}
+
+.secondary-button {
+    background-color: transparent;
+    color: var(--light-text);
+    border: 2px solid var(--light-text);
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-size: 1rem;
+    font-weight: 500;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.secondary-button:before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    height: 100%;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+    z-index: -1;
+}
+
+.secondary-button:hover {
+    color: #fff;
+    transform: translateY(-3px);
+    border-color: var(--secondary-color);
+}
+
+.secondary-button:hover:before {
+    width: 100%;
+}
+
+.icon-button {
+    background-color: transparent;
+    color: var(--light-text);
+    border: none;
+    font-size: 1.5rem;
+    padding: 8px;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    transform: rotate(15deg);
+}
+
+/* Button Glow Effect */
+.btn-glow {
+    animation: glowing 2s infinite;
+}
+
+@keyframes glowing {
+    0% { box-shadow: 0 0 5px var(--primary-glow); }
+    50% { box-shadow: 0 0 20px var(--primary-glow), 0 0 30px var(--primary-glow); }
+    100% { box-shadow: 0 0 5px var(--primary-glow); }
+}
+
+/* Game Screen */
+.game-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: rgba(15, 28, 46, 0.95);
+    z-index: 5;
+    border-bottom: 2px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.player-info, .game-stats {
+    font-size: 1.1rem;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.game-stats {
+    display: flex;
+    gap: 20px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.power-ups-active {
+    display: flex;
+    gap: 10px;
+}
+
+.game-area {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    background-color: var(--darker-bg);
+}
+
+#game-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    background-color: #0a1525; /* Darker background for better visibility */
+}
+
+#camera-display {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 180px;
+    height: 135px;
+    border-radius: 10px;
+    border: 3px solid var(--primary-color);
+    z-index: 2;
+    transform: scaleX(-1); /* Mirror the camera */
+    background-color: #000;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+#camera-display:hover {
+    transform: scaleX(-1) scale(1.05);
+    box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5);
+}
+
+#debug-canvas {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 180px;
+    height: 135px;
+    z-index: 3;
+    border-radius: 10px;
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .sensitivity-control {
+        width: 100%;
+    }
+    
+    input[type="range"] {
+        width: 100%;
+    }
+
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.screen.active .game-panel {
+    animation: fadeIn 0.5s ease, slideUp 0.5s ease;
+}
+
+.primary-button, .secondary-button {
+    transition: all 0.3s ease;
+}
